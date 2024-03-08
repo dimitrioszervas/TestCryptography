@@ -13,7 +13,7 @@ internal class Program
         byte[] decrytedBytes = new byte[ciphertext.Length];
         try
         {
-            var aes = new AesGcm(key);
+            var aes = new AesGcm(key, 16);
             
             byte[] iv = new byte[12];
             Array.Copy(src, iv, 8);
@@ -31,7 +31,7 @@ internal class Program
 
     public static void Encrypt(byte[] plainBytes, byte[] key, byte[] src, ref byte[] ciphertext, ref byte[] tag)
     {
-        var aes = new AesGcm(key);
+        var aes = new AesGcm(key, 16);
 
         byte[] iv = new byte[12];
         Array.Copy(src, iv, 8);
@@ -75,6 +75,7 @@ internal class Program
 
         Console.WriteLine($"Encrypted bytes: {KeyDerivation.ByteArrayToString(encryptedShard)}");
         Console.WriteLine($"Calculated Tag: {KeyDerivation.ByteArrayToString(tag)}");
+        Console.WriteLine();
 
         var decryptedShard = Decrypt(encryptedShard, encrypts[1], src, tag);
 
