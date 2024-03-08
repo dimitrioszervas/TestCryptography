@@ -78,6 +78,6 @@ internal class Program
 
         var decryptedShard = Decrypt(encryptedShard, encrypts[1], src, tag);
 
-        Console.WriteLine($"Encrypted bytes: {KeyDerivation.ByteArrayToString(decryptedShard)}");
+        Console.WriteLine($"Decrypted bytes: {KeyDerivation.ByteArrayToString(decryptedShard)}");
     }
 }
