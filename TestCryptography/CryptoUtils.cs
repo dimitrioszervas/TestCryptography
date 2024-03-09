@@ -7,13 +7,52 @@ using System.Threading.Tasks;
 
 namespace TestCryptography
 {
-    static class KeyDerivation
+    static class CryptoUtils
     {
         private enum KeyType
         {
             SIGN,
             ENCRYPT
         }
+
+        public const int KEY_SIZE = 32;
+
+        public const int TAG_SIZE = 16;
+        public const int IV_SIZE = 12;
+
+        public static byte[] Decrypt(byte[] encryptedData, byte[] key, byte[] src, byte[] tag)
+        {
+            var ciphertext = encryptedData;// encryptedData[0..^16];
+                                           //var tag = new byte[16];// encryptedData[^16..];
+            byte[] decrytedBytes = new byte[ciphertext.Length];
+            try
+            {
+                var aes = new AesGcm(key, TAG_SIZE);
+
+                byte[] iv = new byte[IV_SIZE];
+                Array.Copy(src, iv, 8);
+
+                aes.Decrypt(iv, ciphertext, tag, decrytedBytes);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+            }
+
+            return decrytedBytes;
+        }
+
+        public static void Encrypt(byte[] plainBytes, byte[] key, byte[] src, ref byte[] ciphertext, ref byte[] tag)
+        {
+            var aes = new AesGcm(key, TAG_SIZE);
+
+            byte[] iv = new byte[IV_SIZE];
+            Array.Copy(src, iv, 8);
+
+            aes.Encrypt(iv, plainBytes, ciphertext, tag);
+        }
+      
 
         public static string ByteArrayToString(byte[] bytes)
         {
@@ -42,7 +81,7 @@ namespace TestCryptography
 
             for (int i = 0; i <= n; i++)
             {
-                byte[] key = HKDF.DeriveKey(HashAlgorithmName.SHA256, baseKey, 32, salt, info);
+                byte[] key = HKDF.DeriveKey(HashAlgorithmName.SHA256, baseKey, KEY_SIZE, salt, info);
                 keys.Add(key);
             }
 
@@ -77,7 +116,7 @@ namespace TestCryptography
 
             byte[] sign = HKDF.DeriveKey(hashAlgorithmName: HashAlgorithmName.SHA256,
                                          ikm: secret,
-                                         outputLength: 32,
+                                         outputLength: KEY_SIZE,
                                          salt: salt,
                                          info: Encoding.UTF8.GetBytes("sign"));
 
@@ -86,7 +125,7 @@ namespace TestCryptography
 
             byte[] encrypt = HKDF.DeriveKey(hashAlgorithmName: HashAlgorithmName.SHA256,
                                            ikm: secret,
-                                           outputLength: 32,
+                                           outputLength: KEY_SIZE,
                                            salt: salt,
                                            info: Encoding.UTF8.GetBytes("encrypt"));
 
